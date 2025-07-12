@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+protocol UserRepositoryProtocol {
+    func saveUser(_ user: User) async -> Bool
+    func getUser() async -> User?
+    func deleteUser() async -> Bool
+}
