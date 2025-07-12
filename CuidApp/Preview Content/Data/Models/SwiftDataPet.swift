@@ -6,11 +6,12 @@
 //
 
 import SwiftData
+import SwiftUI
 import Foundation
 
 @Model
 class SwiftDataPet {
-    var id: UUID
+    var id: UUID = UUID()
     var ownerId: UUID?
     var animal: String
     var name: String
@@ -19,8 +20,7 @@ class SwiftDataPet {
     var image: Data?
     var breed: String
     
-    init(id: UUID, ownerId: UUID? = nil, animal: String, name: String, birthDate: Date, isAlive: Bool, image: Data? = nil, breed: String) {
-        self.id = id
+    init(ownerId: UUID? = nil, animal: String, name: String, birthDate: Date, isAlive: Bool, image: Data?, breed: String) {
         self.ownerId = ownerId
         self.animal = animal
         self.name = name
@@ -40,8 +40,13 @@ extension SwiftDataPet: ToPetProtocol {
             name: name,
             birthDate: birthDate,
             isAlive: isAlive,
-            image: image,
+            image: imageDataToUIImage(),
             breed: breed
         )
+    }
+    
+    func imageDataToUIImage() -> UIImage? {
+        guard let imageData = image else { return nil }
+        return UIImage(data: imageData)
     }
 }
