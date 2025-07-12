@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+protocol ToUserProtocol {
+    func toUser() -> User
+}
