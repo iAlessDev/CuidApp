@@ -1,45 +1,68 @@
-//
-//  CuidAppApp.swift
-//  CuidApp
-//
-//  Created by Paul Flores on 02/07/25.
-//
+///
+///  CuidAppApp.swift
+///  CuidApp
+///
+///  Created by Paul Flores on 02/07/25.
+///  Versión optimizada con inyección de dependencias y flujo de sesión limpio.
+///
 import SwiftUI
 import SwiftData
 
 @main
 struct CuidAppApp: App {
-    let pet = Pet(id: UUID(), ownerId: UUID(), animal: "Dog", name: "Pancho", birthDate: NSDate() as Date, isAlive: true, image: nil, breed: "Chihuaua")
-    @Namespace private var zoomNameSpace
-    
+    // MARK: - Repositorios compartidos
+    private let userRepository = UserRepository()
+
+    // MARK: - Gestor de sesión
+    @StateObject private var session: SessionManager
+
+    // MARK: - Namespace para transiciones
+    @Namespace private var zoomNamespace
+
+    // MARK: - Inicialización
     init() {
+        // Configuración global de la UITabBar
         let appearance = UITabBarAppearance()
-        // 1. Fondo difuminado base
         appearance.configureWithDefaultBackground()
         appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-
-        // 2. Tinte consistente con HIG:
-        //    usamos secondarySystemGroupedBackground (un gris suave)
-        //    al 30–40% de opacidad para distinguirla del fondo principal
-        appearance.backgroundColor = UIColor.secondarySystemGroupedBackground.withAlphaComponent(0.35)
-        
-        // 3. Línea suave de separación
+        appearance.backgroundColor = UIColor.secondarySystemGroupedBackground
+            .withAlphaComponent(0.35)
         appearance.shadowColor = UIColor.separator.withAlphaComponent(0.2)
-
-        // 4. Aplicación global
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
+
+        // Inyección de dependencias evitando captura de self en autoclosure
+        let repo = userRepository
+        _session = StateObject(wrappedValue: SessionManager(userRepository: repo))
     }
 
-    
+    // MARK: - Escena principal
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                LoginView(zoomNamespace: zoomNameSpace)
+                // Si no está logueado, mostramos LoginView
+                if !session.isLoggedIn {
+                    LoginView(
+                        viewModel: LoginViewModel(
+                            session: session,
+                            userRepository: userRepository
+                        ),
+                        zoomNamespace: zoomNamespace
+                    )
+
+                // Si está logueado pero sin usuario cargado, mostrar loader
+                } else if session.currentUser == nil {
+                    ProgressView("Cargando usuario...")
+                        .environmentObject(session)
+
+                // Una vez cargado el usuario, presentar HomePetsView
+                } else {
+                    MainTabView(user: session.currentUser!)
+                        .environmentObject(session)
+                }
             }
         }
     }
 }
-
