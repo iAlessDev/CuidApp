@@ -15,7 +15,12 @@ class SignUpViewModel: ObservableObject {
     var alertMessage: String = ""
     var alertTitle: String = ""
     
-    init(userRepository: UserRepositoryProtocol = UserRepository()) {
+    
+    private let credentialsRepository: CredentialsRepositoryProtocol
+    
+    init(userRepository: UserRepositoryProtocol = UserRepository(), credentialsRepo: CredentialsRepositoryProtocol = KeychainHelper()) {
+       
+        self.credentialsRepository = credentialsRepo
         self.userRepository = userRepository
     }
     
@@ -23,7 +28,7 @@ class SignUpViewModel: ObservableObject {
     @Published var passwordSecurityLevel: PasswordSecurityLevel?
     @Published var isPasswordsMatching: Bool?
     @Published var isValidEmail: Bool?
-    @Published var profileImage: UIImage?
+    @Published var profileImage: Data?
     @Published var name: String = ""
    
     @Published var birthDate: Date = Date()
@@ -92,32 +97,60 @@ class SignUpViewModel: ObservableObject {
     }
     
     // MARK: - SignUp Functions
+    @MainActor
     func signUp() async {
-        
         do {
             try validateFields()
-            
-            let newUser = User(
-                id: UUID(),
-                name: name,
-                email: email,
-                birthDate: birthDate,
-                pets: [],
-                profileImage: profileImage
-            )
-            
-            let success = await userRepository.saveUser(newUser)
-            await MainActor.run {
-                self.alertTitle = success ? "Success" : "Error"
-                self.alertMessage = success ? "Successfull registration!" : "An error occurred while registering."
-                self.showAlert = true
-            }
+            let user = makeNewUser()
+            try savePassword()
+            let success = try await saveUser(user)
+            finishRegistration(success: success)
+        } catch let error as SignUpValidationError {
+            presentAlert(title: "Validation Error", message: error.errorDescription)
+        } catch let error as KeychainHelperError {
+            presentAlert(title: "Error saving password", message: error.messageError)
         } catch {
-            alertTitle = "Error"
-            alertMessage = (error as? SignUpValidationError)?.errorDescription ?? "Unknown error."
-            showAlert = true
+            presentAlert(title: "Unexpected Error", message: error.localizedDescription)
         }
     }
+
+    private func makeNewUser() -> User {
+        User(
+            id: UUID(),
+            name: name,
+            email: email,
+            birthDate: birthDate,
+            pets: [],
+            profileImage: profileImage
+        )
+    }
+
+    private func savePassword() throws {
+        let didSave = try credentialsRepository.savePassword(password, for: email)
+        guard didSave else {
+            throw KeychainHelperError.unableToAddPassword
+        }
+    }
+
+    private func saveUser(_ user: User) async throws -> Bool {
+        try await userRepository.saveUser(user, password: password)
+    }
+
+    private func finishRegistration(success: Bool) {
+        let title   = success ? "Success" : "Error"
+        let message = success
+            ? "Registration complete!"
+            : "An error occurred while registering."
+        presentAlert(title: title, message: message)
+        shouldReturnToLogin = success
+    }
+
+    private func presentAlert(title: String, message: String) {
+        alertTitle   = title
+        alertMessage = message
+        showAlert    = true
+    }
+
     
     func validateFields() throws {
         try validateName()
@@ -156,7 +189,7 @@ class SignUpViewModel: ObservableObject {
 enum SignUpValidationError: LocalizedError {
     case emptyName, emptyEmail, invalidEmail, emptyPassword, weakPassword, passwordMismatch, invalidBirthdate
     
-    var errorDescription: String? {
+    var errorDescription: String {
         switch self {
         case .emptyName: return "Name cannot be empty."
         case .emptyEmail: return "Email cannot be empty"
