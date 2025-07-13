@@ -11,6 +11,10 @@ import UIKit
 class PetCardViewModel: ObservableObject {
     
     let pet: Pet
+    var petImage: UIImage? {
+        pet.image.flatMap(UIImage.init(data:))
+    }
+
     
     init(pet: Pet) {
         self.pet = pet
