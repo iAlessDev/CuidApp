@@ -1,0 +1,43 @@
+# --- Xcode ---
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+*.xcworkspace
+xcuserdata/
+
+# --- Swift Package Manager ---
+.swiftpm/
+.build/
+
+# --- Swift Playgrounds ---
+timeline.xctimeline
+playground.xcworkspace
+
+# --- macOS ---
+.DS_Store
+
+# --- User-specific files ---
+*.swp
+*.swo
+*.xcuserdatad/
+
+# --- Photos Picker cache ---
+*.heic
+*.jpg
+*.png
+
+# --- Firebase / GoogleService (si decides usarlo en el futuro) ---
+GoogleService-Info.plist
+
+# --- Xcode Preview state ---
+*.preview-thumbnails
+*.preview-device-state
+
+# --- Others (seguridad, temporales, logs) ---
+*.tmp
+*.temp
+*.log
