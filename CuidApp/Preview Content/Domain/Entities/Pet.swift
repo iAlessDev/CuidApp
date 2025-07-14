@@ -15,10 +15,10 @@ struct Pet: Identifiable, Hashable {
     let name: String
     let birthDate: Date
     let isAlive: Bool
-    let image: UIImage?
+    let image: Data?
     let breed: String
     
-    init(id: UUID, ownerId: UUID, animal: String, name: String, birthDate: Date, isAlive: Bool, image: UIImage?, breed: String) {
+    init(id: UUID, ownerId: UUID, animal: String, name: String, birthDate: Date, isAlive: Bool, image: Data?, breed: String) {
         self.id = id
         self.ownerId = ownerId
         self.animal = animal
@@ -27,5 +27,20 @@ struct Pet: Identifiable, Hashable {
         self.isAlive = isAlive
         self.image = image
         self.breed = breed
+    }
+    
+    func toSwiftDataPet() -> SwiftDataPet {
+        let swiftDataPets =
+            SwiftDataPet(
+                id: id,
+                ownerId: ownerId,
+                animal: animal,
+                name: name,
+                birthDate: birthDate,
+                isAlive: isAlive,
+                image: image,
+                breed: breed
+            )
+        return swiftDataPets
     }
 }
