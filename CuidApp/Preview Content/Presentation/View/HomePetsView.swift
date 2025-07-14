@@ -9,16 +9,25 @@ import SwiftUI
 import SwiftData
 
 struct HomePetsView: View {
-    @EnvironmentObject var viewModel: HomePetsViewModel
-    
+    @StateObject var viewModel: HomePetsViewModel
+    @EnvironmentObject var session: SessionManager
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 header
-                PetCardView(petCardViewModel: PetCardViewModel(pet: viewModel.pet))
+                
+                if let pet = viewModel.user.pets.first {
+                    PetCardView(petCardViewModel: PetCardViewModel(pet: pet))
+                }
                 tasks
                 announce
+                
+                Button {
+                    session.logout()
+                } label: {
+                    Text("Logout")
+                }
             }
             .background(Color(red: 0.98, green: 0.94, blue: 0.89))
         }
@@ -32,13 +41,15 @@ struct HomePetsView: View {
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                     
-                    Text("\(viewModel.pet.name) is waiting for you")
+                    Text("\(viewModel.user.pets.first?.name ?? "Empty pet") is waiting for you")
                         .font(.title2)
                 }
                 Spacer()
-                if viewModel.hasProfileImage {
-                    
-                    
+                if let profileImage = viewModel.user.profileImage {
+                    Image(uiImage: UIImage(data: profileImage)!)
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .clipShape(.circle)
                 } else {
                     Image(systemName: "person.crop.circle")
                         .resizable()
@@ -136,8 +147,8 @@ struct HomePetsView: View {
     
     let user = User(id: UUID(), name: "iAlessDev", email: "paul@mail.com", birthDate: NSDate() as Date, pets: [pet], profileImage: nil)
     
-    HomePetsView()
-        .environmentObject(HomePetsViewModel(pet: pet, user: user))
+    HomePetsView(viewModel: HomePetsViewModel(user: user))
+        .environmentObject(SessionManager())
 }
 
 
