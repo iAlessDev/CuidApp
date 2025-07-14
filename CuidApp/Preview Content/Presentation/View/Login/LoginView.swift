@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State var email: String = ""
-    @State var password: String = ""
-    let zoomNamespace: Namespace.ID
     @State private var transitionToSignUpId: String = "id"
+    @StateObject var viewModel: LoginViewModel
+    
+    let zoomNamespace: Namespace.ID
+    
     
     var body: some View {
         NavigationStack {
@@ -28,6 +29,7 @@ struct LoginView: View {
             .background(Color.cuidaAppBg)
         }
     }
+        
     
     var header: some View {
         VStack {
@@ -46,10 +48,10 @@ struct LoginView: View {
         VStack(alignment: .center, spacing: 25) {
             
             HStack {
-                Image(systemName: "envelope") // 📧 ícono antes del placeholder
+                Image(systemName: "envelope")
                     .foregroundColor(.orange)
 
-                TextField("Email", text: $email)
+                TextField("Email", text: $viewModel.email)
                     .autocapitalization(.none)
             }
             .padding(20)
@@ -62,10 +64,10 @@ struct LoginView: View {
 
             
             HStack {
-                Image(systemName: "key") // 📧 ícono antes del placeholder
+                Image(systemName: "key")
                     .foregroundColor(.orange)
 
-                SecureField("Password", text: $password)
+                SecureField("Password", text: $viewModel.password)
                     .autocapitalization(.none)
             }
             .padding(20)
@@ -77,7 +79,13 @@ struct LoginView: View {
             .cornerRadius(10)
             
             Button {
-                print("Login Button")
+                Task {
+                    do {
+                        try await viewModel.signIn()
+                    } catch {
+                        viewModel.handle(error: error)
+                    }
+                }
             } label: {
                 Text("Sign In")
                     .frame(maxWidth: .infinity)
@@ -90,7 +98,15 @@ struct LoginView: View {
         }
         .padding(.top, 50)
         .padding(.horizontal)
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(
+                title: Text(viewModel.alertTitle),
+                message: Text(viewModel.alertMessage),
+                dismissButton: .default(Text("Accept"))
+            )
+        }
     }
+    
     
     var signUp: some View {
         VStack(spacing: 15) {
@@ -134,5 +150,8 @@ extension Color {
 
 #Preview {
     @Previewable @Namespace var zoomNameSpace
-    LoginView(zoomNamespace: zoomNameSpace)
+    LoginView(
+        viewModel: LoginViewModel(session: SessionManager()),
+        zoomNamespace: zoomNameSpace
+    )
 }
