@@ -9,17 +9,20 @@ import Foundation
 import SwiftUI
 
 class HomePetsViewModel: ObservableObject {
-    @Published var pet: Pet
     @Published var user: User
     @Published var hasProfileImage: Bool
     
-    init(pet: Pet, user: User) {
-        self.pet = pet
+    
+    init(user: User) {
         self.user = user
         self.hasProfileImage = user.profileImage != nil ? true : false
     }
     
     func dataImageToUUImage(_ data: Data) -> UIImage? {
         return UIImage(data: data)
+    }
+    
+    func logout() {
+        
     }
 }
