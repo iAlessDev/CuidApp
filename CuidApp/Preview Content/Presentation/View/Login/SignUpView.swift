@@ -27,30 +27,31 @@ struct SignUpView: View {
             Text("CuidaApp")
                 .font(.largeTitle)
             
-                PhotosPicker(
-                    selection: $photoPickerViewModel.selectedPhoto,
-                    matching: .images,
-                    photoLibrary: .shared()
-                ) {
-                    
-                    if let profileImage = photoPickerViewModel.image {
-                        Image(uiImage: profileImage)
-                            .resizable()
-                            .clipShape(.circle)
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                    } else {
-                        Image(systemName: "camera.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .foregroundColor(.gray)
-                    }
+            Button {
+                photoPickerViewModel.requestGalleryAccess()
+            } label: {
+                if let profileImage = photoPickerViewModel.image {
+                    Image(uiImage: profileImage)
+                        .resizable()
+                        .clipShape(.circle)
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                } else {
+                    Image(systemName: "camera.circle.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(.gray)
                 }
-                .onChange(of: photoPickerViewModel.selectedPhoto) {
-                    photoPickerViewModel.loadSelectedPhoto()
-                    viewModel.profileImage = photoPickerViewModel.image
-                }
+            }
+            .photosPicker(
+                isPresented: $photoPickerViewModel.showPhotoPicker,
+                selection: $photoPickerViewModel.selectedPhoto,
+                matching: .images)
+            
+            .onChange(of: photoPickerViewModel.image) {
+                viewModel.profileImage = photoPickerViewModel.selectedImageData
+            }
         }
         .padding(.top, 50)
     }
