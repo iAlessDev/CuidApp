@@ -11,17 +11,19 @@ import SwiftUI
 
 @Model
 class SwiftDataUser: Identifiable {
-    var id: UUID = UUID()
+    var id: UUID
     var name: String
     var email: String
     var birthDate: Date
     var pets: [SwiftDataPet] = []
     var profileImage: Data?
     
-    init(name: String, email: String, birthDate: Date, profileImage: Data?) {
+    init(id: UUID, name: String, email: String, birthDate: Date, pets: [SwiftDataPet], profileImage: Data? = nil) {
+        self.id = id
         self.name = name
         self.email = email
         self.birthDate = birthDate
+        self.pets = pets
         self.profileImage = profileImage
     }
 }
@@ -34,12 +36,7 @@ extension SwiftDataUser: ToUserProtocol {
             email: email,
             birthDate: birthDate,
             pets: pets.map { $0.toPet() },
-            profileImage: imageDataToUIImage()
+            profileImage: profileImage
         )
-    }
-    
-    func imageDataToUIImage() -> UIImage? {
-        guard let data = profileImage else { return Optional.none }
-        return UIImage(data: data)
     }
 }
