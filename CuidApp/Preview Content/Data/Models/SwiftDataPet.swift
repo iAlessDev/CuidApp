@@ -11,8 +11,8 @@ import Foundation
 
 @Model
 class SwiftDataPet {
-    var id: UUID = UUID()
-    var ownerId: UUID?
+    var id: UUID
+    var ownerId: UUID
     var animal: String
     var name: String
     var birthDate: Date
@@ -20,7 +20,8 @@ class SwiftDataPet {
     var image: Data?
     var breed: String
     
-    init(ownerId: UUID? = nil, animal: String, name: String, birthDate: Date, isAlive: Bool, image: Data?, breed: String) {
+    init(id: UUID, ownerId: UUID, animal: String, name: String, birthDate: Date, isAlive: Bool, image: Data? = nil, breed: String) {
+        self.id = id
         self.ownerId = ownerId
         self.animal = animal
         self.name = name
@@ -35,18 +36,13 @@ extension SwiftDataPet: ToPetProtocol {
     func toPet() -> Pet {
         return Pet(
             id: id,
-            ownerId: ownerId!,
+            ownerId: ownerId,
             animal: animal,
             name: name,
             birthDate: birthDate,
             isAlive: isAlive,
-            image: imageDataToUIImage(),
+            image: image,
             breed: breed
         )
-    }
-    
-    func imageDataToUIImage() -> UIImage? {
-        guard let imageData = image else { return nil }
-        return UIImage(data: imageData)
     }
 }
