@@ -8,7 +8,7 @@
 import Foundation
 
 protocol UserRepositoryProtocol {
-    func saveUser(_ user: User) async -> Bool
-    func getUser() async -> User?
+    func saveUser(_ user: User, password: String) async throws -> Bool
+    func fetchUserWithEmail(_ email: String) async throws -> User? 
     func deleteUser() async -> Bool
 }
