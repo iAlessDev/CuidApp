@@ -10,7 +10,8 @@ import SwiftUI
 struct MainTabView: View {
     // Estado para la pestaña seleccionada
     @State private var selection: Tab = .home
-    @EnvironmentObject private var viewModel: HomePetsViewModel
+    @EnvironmentObject var session: SessionManager
+    @State var user: User
     
     // Definimos un enum para las pestañas
     enum Tab {
@@ -20,7 +21,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selection) {
             // 1. Home
-            HomePetsView()
+            HomePetsView(viewModel: HomePetsViewModel(user: user))
                 .tabItem {
                     Label("Home", systemImage: selection == .home ? "house.fill" : "house")
                 }
@@ -57,6 +58,6 @@ struct MainTabView: View {
     
     let user = User(id: UUID(), name: "iAlessDev", email: "paul@mail.com", birthDate: NSDate() as Date, pets: [pet], profileImage: nil)
     
-    MainTabView()
-        .environmentObject(HomePetsViewModel(pet: pet, user: user))
+    MainTabView(user: user)
+        .environmentObject(HomePetsViewModel(user: user))
 }

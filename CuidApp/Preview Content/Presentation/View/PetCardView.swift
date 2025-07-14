@@ -13,7 +13,7 @@ struct PetCardView: View {
     var body: some View {
         VStack {
             HStack {
-                if let image = petCardViewModel.pet.image {
+                if let image = petCardViewModel.petImage {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
