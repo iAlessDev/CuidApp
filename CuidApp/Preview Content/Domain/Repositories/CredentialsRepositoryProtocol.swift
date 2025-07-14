@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+protocol CredentialsRepositoryProtocol {
+    func savePassword(_ password: String, for email: String) throws -> Bool
+    func getPassword(for email: String) throws -> String?
+}
