@@ -8,7 +8,6 @@
 import Foundation
 import SwiftData
 
-@MainActor
 class PetRepository: PetRepositoryProtocol {
     
     private let container: ModelContainer
@@ -23,11 +22,31 @@ class PetRepository: PetRepositoryProtocol {
     }
     
     func savePet(_ pet: Pet) async -> Bool {
-        return true
+        let swiftDataPet = pet.toSwiftDataPet()
+        
+        do {
+            context.insert(swiftDataPet)
+            try context.save()
+            return true
+        } catch {
+            return error.localizedDescription.contains("already exists")
+        }
     }
     
-    func getPets(for ownerId: UUID) async -> [Pet] {
-        return []
+    func fetchPetsWith(ownerId: UUID) async -> [Pet] {
+        let predicate =
+        #Predicate<SwiftDataPet> { register in register.ownerId == ownerId }
+        
+        let descriptor = FetchDescriptor<SwiftDataPet>(predicate: predicate)
+        
+        do {
+            let swiftDataPet = try context.fetch(descriptor)
+            print(swiftDataPet.first?.toPet() ?? "No Pets")
+            return swiftDataPet.map { $0.toPet() }
+        } catch {
+            print("Unable to fetch user")
+            return []
+        }
     }
     
     func deletePet(withId id: UUID) async -> Bool {
