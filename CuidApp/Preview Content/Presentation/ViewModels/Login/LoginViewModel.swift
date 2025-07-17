@@ -38,7 +38,6 @@ class LoginViewModel: ObservableObject {
     private func fetchUser() async throws -> User {
         guard let user = try await userRepository.fetchUserWithEmail(email) else {
         throw LoginError.userNotFound
-            
         }
         return user
     }
@@ -60,13 +59,13 @@ class LoginViewModel: ObservableObject {
         switch error {
             
         case let err as LoginError:
-          showAlert(title: "Login Error", message: err.errorDescription!)
+          showAlert(title: "Login Error", message: err.errorDescription)
             
         case let err as KeychainHelperError:
           showAlert(title: "Keychain Error", message: err.messageError)
             
         default:
-          showAlert(title: "Error inesperado", message: error.localizedDescription)
+          showAlert(title: "Unknown Error", message: error.localizedDescription)
             
         }
     }
@@ -79,15 +78,14 @@ class LoginViewModel: ObservableObject {
 }
 
 enum LoginError: LocalizedError {
-  case userNotFound
-  case invalidCredentials
+  case userNotFound, invalidCredentials
 
-  var errorDescription: String? {
+  var errorDescription: String {
       switch self {
       case .userNotFound:
-          return "No se encontró un usuario con ese email."
+          return "User not found"
       case .invalidCredentials:
-          return "Email o contraseña incorrectos."
+          return "Email or password is incorrect"
       }
     }
 }
