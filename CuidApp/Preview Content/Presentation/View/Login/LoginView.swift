@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @State private var transitionToSignUpId: String = "id"
-    @StateObject var viewModel: LoginViewModel
+    @ObservedObject var viewModel: LoginViewModel
     
     let zoomNamespace: Namespace.ID
     
@@ -26,15 +26,15 @@ struct LoginView: View {
                 // Footer
                 footer
             }
-            .background(Color.cuidaAppBg)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Cuida App")
+            .navigationBarTitleDisplayMode(.large)
         }
     }
-        
+    
     
     var header: some View {
         VStack {
-            Text("CuidaApp")
-                .font(.largeTitle)
             Image(systemName: "pawprint.circle")
                 .resizable()
                 .scaledToFit()
@@ -45,38 +45,36 @@ struct LoginView: View {
     }
     
     var login: some View {
-        VStack(alignment: .center, spacing: 25) {
+        VStack(alignment: .center, spacing: 24) {
             
             HStack {
                 Image(systemName: "envelope")
-                    .foregroundColor(.orange)
-
                 TextField("Email", text: $viewModel.email)
                     .autocapitalization(.none)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
             }
-            .padding(20)
-            .background(Color(.systemBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.orange, lineWidth: 2)
-            )
-            .cornerRadius(10)
-
+            .padding(16)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(8)
+            .overlay {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.separator), lineWidth: 1)
+            }
+            
             
             HStack {
                 Image(systemName: "key")
-                    .foregroundColor(.orange)
-
                 SecureField("Password", text: $viewModel.password)
                     .autocapitalization(.none)
             }
-            .padding(20)
-            .background(Color(.systemBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.orange, lineWidth: 2)
-            )
-            .cornerRadius(10)
+            .padding(16)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(8)
+            .overlay {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.separator), lineWidth: 1)
+            }
             
             Button {
                 Task {
@@ -89,15 +87,14 @@ struct LoginView: View {
             } label: {
                 Text("Sign In")
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .foregroundStyle(Color.white)
-                    .background(Color.cuidaAppBgButtons)
-                    .clipShape(.rect(cornerRadius: 20))
-                    
+                
             }
+            .buttonStyle(.borderedProminent)
+            .tint(.accentColor)
+            .controlSize(.large)
         }
-        .padding(.top, 50)
         .padding(.horizontal)
+        .padding(.top)
         .alert(isPresented: $viewModel.showAlert) {
             Alert(
                 title: Text(viewModel.alertTitle),
@@ -113,25 +110,23 @@ struct LoginView: View {
             Text("Don't have an account?")
             
             NavigationLink {
-                            SignUpView(
-                                viewModel: SignUpViewModel(),
-                                photoPickerViewModel: PhotoPickerViewModel()
-                            )
-                            .navigationTransition(
-                                // The end of the transition, where will end
-                                .zoom(
-                                    sourceID: "login-signup",
-                                    in: zoomNamespace
-                                )
-                            )
-                        } label: {
-                            Text("Create an account")
-                                .foregroundStyle(Color.orange)
-                        }
-                        .matchedTransitionSource(id: "login-signup", in: zoomNamespace)
-                    }
-                    .padding(.top, 30)
+                SignUpView(photoPickerViewModel: PhotoPickerViewModel())
+                    .navigationTransition(
+                        // The end of the transition, where will end
+                        .zoom(
+                            sourceID: "login-signup",
+                            in: zoomNamespace
+                        )
+                    )
+            } label: {
+                Text("Create an account")
+            }
+            .tint(.secondary)
+            .controlSize(.regular)
+            .matchedTransitionSource(id: "login-signup", in: zoomNamespace)
         }
+        .padding(.top, 30)
+    }
     
     var footer: some View {
         Text("Cada cuidado que das, vuelve en forma de amor.")
@@ -141,11 +136,6 @@ struct LoginView: View {
             .frame(maxWidth: 250)
     }
     
-}
-        
-extension Color {
-  static let cuidaAppBg = Color(red: 1, green: 0.98, blue: 0.95)
-  static let cuidaAppBgButtons = Color(red: 1.0, green: 0.58, blue: 0.20)
 }
 
 #Preview {
