@@ -11,6 +11,6 @@ struct GetPetsForUser {
     let repository: PetRepository
     
     func execute(userId: UUID) async -> [Pet] {
-        await repository.getPets(for: userId)
+        await repository.fetchPetsWith(ownerId: userId)
     }
 }
