@@ -9,6 +9,6 @@ import Foundation
 
 protocol PetRepositoryProtocol {
     func savePet(_ pet: Pet) async -> Bool
-    func getPets(for ownerId: UUID) async -> [Pet]
+    func fetchPetsWith(ownerId: UUID) async -> [Pet]
     func deletePet(withId id: UUID) async -> Bool
 }
