@@ -3,7 +3,7 @@
 ///  CuidApp
 ///
 ///  Created by Paul Flores on 02/07/25.
-///  Versión optimizada con inyección de dependencias y flujo de sesión limpio.
+///  Optimazed version with dependency inyection and clean navigation
 ///
 import SwiftUI
 import SwiftData
@@ -45,10 +45,7 @@ struct CuidAppApp: App {
                 // Si no está logueado, mostramos LoginView
                 if !session.isLoggedIn {
                     LoginView(
-                        viewModel: LoginViewModel(
-                            session: session,
-                            userRepository: userRepository
-                        ),
+                        viewModel: LoginViewModel(session: session),
                         zoomNamespace: zoomNamespace
                     )
 
