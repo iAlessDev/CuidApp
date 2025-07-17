@@ -9,50 +9,88 @@ import SwiftUI
 import SwiftData
 
 struct HomePetsView: View {
+    @State var isShowingAddPetModal: Bool = false
     @StateObject var viewModel: HomePetsViewModel
     @EnvironmentObject var session: SessionManager
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                header
-                
-                if let pet = viewModel.user.pets.first {
-                    PetCardView(petCardViewModel: PetCardViewModel(pet: pet))
-                }
-                tasks
-                announce
-                
-                Button {
-                    session.logout()
-                } label: {
-                    Text("Logout")
-                }
-            }
-            .background(Color(red: 0.98, green: 0.94, blue: 0.89))
+                VStack {
+                    header
+
+                    if let pet = viewModel.user.pets.first {
+                        ScrollView {
+                            PetCardView(petCardViewModel: PetCardViewModel(pet: pet))
+                            tasks
+                            announce
+                        }
+                    } else {
+                        VStack {
+                            Spacer()
+                            Image(systemName: "dog")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(.secondary.opacity(0.5))
+                            Text("Add a new pet to get started")
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 8)
+                                .foregroundStyle(.secondary.opacity(0.5))
+                            Button {
+                                isShowingAddPetModal = true
+                            } label: {
+                                Image(systemName: "plus.circle")
+                                    .font(.title2)
+                                    .imageScale(.large)
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
+                                    .accessibilityLabel("Agregar mascota")
+                            }
+                            Spacer()
+                        }
+                    }
+
+                    Button {
+                        session.logout()
+                    } label: {
+                        Text("Logout")
+                    }
+                    .padding(.top, 20)
+        }
+        .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $isShowingAddPetModal) {
+            AddPetSheetView(
+                viewModel: AddPetSheetViewModel(user: session.currentUser!),
+                photoPickerViewModel: PhotoPickerViewModel()
+            )
         }
     }
+
     
     var header: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Hello \(viewModel.user.name)")
+                        .lineLimit(1)
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                     
-                    Text("\(viewModel.user.pets.first?.name ?? "Empty pet") is waiting for you")
-                        .font(.title2)
+                    if let pet = viewModel.user.pets.first {
+                        Text("\(pet) is waiting for you")
+                    }
                 }
                 Spacer()
                 if let profileImage = viewModel.user.profileImage {
                     Image(uiImage: UIImage(data: profileImage)!)
                         .resizable()
+                        .clipShape(Circle())
+                        .scaledToFill()
                         .frame(width: 50, height: 50)
-                        .clipShape(.circle)
                 } else {
                     Image(systemName: "person.crop.circle")
                         .resizable()
+                        .scaledToFill()
                         .frame(width: 50, height: 50)
                         .foregroundStyle(Color.blue)
                 }
@@ -145,7 +183,7 @@ struct HomePetsView: View {
     
     let pet = Pet(id: UUID(), ownerId: UUID(), animal: "Dog", name: "Pancho", birthDate: Calendar.current.date(from: dateComponents)!, isAlive: true, image: nil, breed: "Chihuaua")
     
-    let user = User(id: UUID(), name: "iAlessDev", email: "paul@mail.com", birthDate: NSDate() as Date, pets: [pet], profileImage: nil)
+    let user = User(id: UUID(), name: "iAlessDev", email: "paul@mail.com", birthDate: NSDate() as Date, pets: [], profileImage: nil)
     
     HomePetsView(viewModel: HomePetsViewModel(user: user))
         .environmentObject(SessionManager())
